@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import routerforgot from "./routes/forgotPassword";
 import dotenv from 'dotenv';
+import registerRouter from './routes/registerRoute' 
 dotenv.config();
 
 const app = express();
@@ -27,6 +28,7 @@ mongoose.connect(MONGO_URL);
 mongoose.connection.on('error', (error: Error) => console.log(error));
 
 // app.use("/", router());
+app.use(registerRouter)
 
 // middleware for all
 // app.use(middleware.commonLog);

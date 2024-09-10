@@ -1,7 +1,17 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt-nodejs";
 
-const UserSchema = new mongoose.Schema({
+interface IUser extends mongoose.Document {
+    fullName: string;
+    email: string;
+    password: string;
+    otp: string;
+    address: string;
+    isActivated: boolean;
+    comparePassword: (password: string) => boolean;
+}
+
+const UserSchema = new mongoose.Schema<IUser>({
     fullName: {
         type: String,
         required: true
@@ -29,15 +39,9 @@ const UserSchema = new mongoose.Schema({
     }
 })
 
+// method to compare a given password with the database hash
+UserSchema.methods.comparePassword = function(password: string) {
+    return bcrypt.compareSync(password, this.password);
+};
 
-UserSchema.statics.findByCredentials = async function (email: string, password: string) {
-    const user = await this.findOne({ email });
-    if (!user) {
-        throw new Error('Invalid login credentials');
-    }
-    const isPasswordMatch = bcrypt.compareSync(password, user.password);
-    if (!isPasswordMatch) {
-        throw new Error('Invalid login credentials');
-    }
-}
-export const UserModel = mongoose.model("User", UserSchema);
+export const UserModel = mongoose.model<IUser>("User", UserSchema);

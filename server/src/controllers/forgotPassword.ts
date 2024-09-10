@@ -1,25 +1,24 @@
 import { Request, Response } from 'express';
-import { generateResetToken, resetPassword } from '../services/forgotPassword';
+import { generateResetToken, resetPassword } from '../services/resetpwService';
 
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
     try {
         const { email } = req.body;
-        await generateResetToken(email);
-        res.status(200).send('Password reset email sent');
+        const forgotResponse = await generateResetToken(email);
+        res.status(200).json(forgotResponse);
     } catch (error) {
-        // console.error(error);
-        res.status(500).send('Error sending password reset email');
+        res.status(500).json({ error: error.message });
     }
 };
 
 export const resetPasswordController = async (req: Request, res: Response): Promise<void> => {
     try {
         const { otp, newPassword } = req.body;
-        await resetPassword(otp, newPassword);
-        res.status(200).send('Password has been reset successfully');
+        const resetResponse = await resetPassword(otp, newPassword);
+        res.status(200).json(resetResponse);
     } catch (error) {
         // console.error(error);
-        res.status(400).send('Invalid OTP or error resetting password');
+        res.status(400).json({ error: error.message });
     }
 };
 

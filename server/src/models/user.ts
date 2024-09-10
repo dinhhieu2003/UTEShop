@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt-nodejs"
+import bcrypt from "bcrypt-nodejs";
+
 const UserSchema = new mongoose.Schema({
     fullName: {
         type: String,
@@ -28,24 +29,15 @@ const UserSchema = new mongoose.Schema({
     }
 })
 
-//hash the password before the user is saved
-UserSchema.pre('save', function(next) {
-	const user = this;
 
-	// Hash the password only if the password has been changed or user is new
-	if (!user.isModified('password')) return next();
-
-	bcrypt.hash(user.password, null, null, function(err, hash) {
-		if (err) return next(err);
-
-		user.password = hash;
-		next();
-	});
-});
-
-// method to compare a given password with the database hash
-UserSchema.methods.comparePassword = function(password: string) {
-    return bcrypt.compareSync(password, this.password);
-};
-
+UserSchema.statics.findByCredentials = async function (email: string, password: string) {
+    const user = await this.findOne({ email });
+    if (!user) {
+        throw new Error('Invalid login credentials');
+    }
+    const isPasswordMatch = bcrypt.compareSync(password, user.password);
+    if (!isPasswordMatch) {
+        throw new Error('Invalid login credentials');
+    }
+}
 export const UserModel = mongoose.model("User", UserSchema);

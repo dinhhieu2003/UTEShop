@@ -1,9 +1,9 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
-import forgotRouter from "./routes/forgotPassword";
 import dotenv from 'dotenv';
-import registerRouter from './routes/registerRoute' 
+import loginRoute from './routes/loginRoute';
+import forgotRouter from './routes/forgotPassword'
 dotenv.config();
 
 const app = express();
@@ -11,7 +11,6 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); 
 
-app.use(forgotRouter)
 
 let port = process.env.PORT || 6969;
  
@@ -27,8 +26,9 @@ mongoose.Promise = Promise;
 mongoose.connect(MONGO_URL);
 mongoose.connection.on('error', (error: Error) => console.log(error));
 
-// app.use("/", router());
-app.use(registerRouter)
+app.use("/login", loginRoute);
+app.use(forgotRouter)
+
 
 // middleware for all
 // app.use(middleware.commonLog);

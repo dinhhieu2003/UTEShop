@@ -1,10 +1,15 @@
 import { UserModel } from "../models/user"
 import { sendOtpEmail } from "./emailService"
-import bcrypt from "bcrypt-nodejs"
 
 const generateOtp = (): string => {
     return Math.floor(100000 + Math.random() * 900000).toString();
-  };
+};
+
+const validatePassword = (password: string): boolean => {
+    // regex for minimum 6 characters, at least 1 letter and 1 number
+    const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/
+    return regex.test(password)
+}
 
 export const registerUser = async (fullName: string, email: string, password: string) => {
     const existingUser = await UserModel.findOne({ email });
@@ -12,8 +17,13 @@ export const registerUser = async (fullName: string, email: string, password: st
         throw new Error("User already exists");
     }
 
-    const salt = await bcrypt.genSaltSync(10);
-    const hashedPassword = await bcrypt.hashSync(password, salt);
+    if (!validatePassword(password)) {
+        throw new Error("Password must be at least 6 characters long and contain both letters and numbers")
+    }
+
+    // đã hash trước khi save vào MongoDB
+    // const salt = await bcrypt.genSaltSync(10);
+    // const hashedPassword = await bcrypt.hashSync(password, salt);
 
     const otp = generateOtp();
 
@@ -21,17 +31,15 @@ export const registerUser = async (fullName: string, email: string, password: st
     const newUser = new UserModel({
         fullName,
         email,
-        password: hashedPassword,
+        password,
         otp,
     });
     await newUser.save();
 
-    // Send OTP via email
     await sendOtpEmail(email, otp);
 };
 
-// Verify OTP service
-export const verifyOtp = async (email: string, otp: string) => {
+export const verifyOTP = async (email: string, otp: string) => {
     const user = await UserModel.findOne({ email });
     if (!user) {
         throw new Error("User not found");

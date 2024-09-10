@@ -1,17 +1,19 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
-// import router from "./routes/index";
+import routerforgot from "./routes/forgotPassword";
 import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true })); 
+
+app.use(routerforgot)
 
 let port = process.env.PORT || 6969;
-
+ 
 app.listen(port, () => {
     //callback
     console.log("Backend Nodejs is runing on the port : " + port)

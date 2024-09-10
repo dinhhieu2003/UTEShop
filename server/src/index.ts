@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
-import routerforgot from "./routes/forgotPassword";
+import forgotRouter from "./routes/forgotPassword";
 import dotenv from 'dotenv';
 import registerRouter from './routes/registerRoute' 
 dotenv.config();
@@ -11,7 +11,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); 
 
-app.use(routerforgot)
+app.use(forgotRouter)
 
 let port = process.env.PORT || 6969;
  

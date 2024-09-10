@@ -22,3 +22,4 @@ export const resetPasswordController = async (req: Request, res: Response): Prom
         res.status(400).send('Invalid OTP or error resetting password');
     }
 };
+

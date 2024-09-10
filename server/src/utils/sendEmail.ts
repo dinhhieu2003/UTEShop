@@ -1,35 +1,27 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer"
+import dotenv from "dotenv"
 
-interface SendEmailOptions {
-    to: string;
-    subject: string;
-    message: string;
-}
+dotenv.config();
 
-const sendEmail = async (options: SendEmailOptions): Promise<void> => {
+export const sendOtpEmail = async (email: string, otp: string, message: string = "") => {
     const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST, 
-        port: Number(process.env.SMTP_PORT), 
-        secure: process.env.SMTP_SECURE === 'true', 
+        service: "gmail",
         auth: {
-            user: process.env.SMTP_USER, 
-            pass: process.env.SMTP_PASS, 
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
         },
     });
 
     const mailOptions = {
-        from: process.env.SMTP_FROM, 
-        to: options.to, 
-        subject: options.subject, 
-        html: options.message, 
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Your OTP for registration",
+        html: `Your OTP code is: ${otp}</p>${message}`,
     };
 
     try {
         await transporter.sendMail(mailOptions);
     } catch (error) {
-        // console.error('Error sending email:', error);
-        throw new Error('Failed to send email');
+        console.error("Failed to send email:", error);
     }
 };
-
-export default sendEmail;

@@ -1,6 +1,17 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt-nodejs"
-const UserSchema = new mongoose.Schema({
+import bcrypt from "bcrypt-nodejs";
+
+interface IUser extends mongoose.Document {
+    fullName: string;
+    email: string;
+    password: string;
+    otp: string;
+    address: string;
+    isActivated: boolean;
+    comparePassword: (password: string) => boolean;
+}
+
+const UserSchema = new mongoose.Schema<IUser>({
     fullName: {
         type: String,
         required: true

@@ -1,18 +1,38 @@
 import { UserModel } from "../models/user";
-import bcrypt from "bcrypt-nodejs";
+import { ApiResponse } from "../dto/response/apiResponse";
 import jwt from "jsonwebtoken";
+
 
 export const login = async (email: string, password: string) => {
     const user = await UserModel.findOne({ email} );
+    let response: ApiResponse;
     if (!user) {
-        throw new Error('Invalid login credentials' );
+        response = {
+            statusCode: 401,
+            message: 'Invalid login credentials - email',
+            data: null,
+            error: "Unauthorized"
+        }
+        return response;
     }
-    // const isPasswordMatch = bcrypt.compareSync(password, user.password);
-    const isPasswordMatch = user.password === password;
+    const isPasswordMatch = user.comparePassword(password);
+    // const isPasswordMatch = user.password === password;
     if (!isPasswordMatch) {
-        throw new Error('Invalid login credentials');
+        response = {
+            statusCode: 401,
+            message: 'Invalid login credentials',
+            data: null,
+            error: "Unauthorized"
+        }
+        return response;
     }
-    return generateTokens(user);
+    response = {
+        statusCode: 200,
+        message: "Login successfully",
+        data: generateTokens(user),
+        error: null
+    }
+    return response;
 }
 
 const generateAccessToken = (user: typeof UserModel.prototype) => {

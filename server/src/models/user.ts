@@ -1,6 +1,16 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt-nodejs";
 
-const UserSchema = new mongoose.Schema({
+interface IUser extends mongoose.Document {
+    fullName: string;
+    email: string;
+    password: string;
+    otp: string;
+    address: string;
+    comparePassword: (password: string) => boolean;
+}
+
+const UserSchema = new mongoose.Schema<IUser>({
     fullName: {
         type: String,
         required: true
@@ -24,4 +34,9 @@ const UserSchema = new mongoose.Schema({
     }
 })
 
-export const UserModel = mongoose.model("User", UserSchema);
+// method to compare a given password with the database hash
+UserSchema.methods.comparePassword = function(password: string) {
+    return bcrypt.compareSync(password, this.password);
+};
+
+export const UserModel = mongoose.model<IUser>("User", UserSchema);

@@ -1,5 +1,6 @@
 import { UserModel } from "../models/user"
 import { sendOtpEmail } from "./emailService"
+import { ApiResponse } from "dto/response/apiResponse";
 
 const generateOtp = (): string => {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -13,17 +14,26 @@ const validatePassword = (password: string): boolean => {
 
 export const registerUser = async (fullName: string, email: string, password: string) => {
     const existingUser = await UserModel.findOne({ email });
+    let response: ApiResponse
     if (existingUser) {
-        throw new Error("User already exists");
+        response = {
+            statusCode: 400,
+            message: 'Can not register',
+            data: null,
+            error: 'User already exists'
+        }
+        return response
     }
 
     if (!validatePassword(password)) {
-        throw new Error("Password must be at least 6 characters long and contain both letters and numbers")
+        response = {
+            statusCode: 400,
+            message: 'Can not register',
+            data: null,
+            error: 'Password must be at least 6 characters long and contain both letters and numbers'
+        }
+        return response
     }
-
-    // đã hash trước khi save vào MongoDB
-    // const salt = await bcrypt.genSaltSync(10);
-    // const hashedPassword = await bcrypt.hashSync(password, salt);
 
     const otp = generateOtp();
 
@@ -35,14 +45,27 @@ export const registerUser = async (fullName: string, email: string, password: st
         otp,
     });
     await newUser.save();
-
     await sendOtpEmail(email, otp);
+    response = {
+        statusCode: 200,
+        message: 'OTP sent via Email',
+        data: null,
+        error: null
+    }
+    return response
 };
 
 export const verifyOTP = async (email: string, otp: string) => {
     const user = await UserModel.findOne({ email });
+    let response: ApiResponse
     if (!user) {
-        throw new Error("User not found");
+        response = {
+            statusCode: 400,
+            message: 'Verify failed',
+            data: null,
+            error: 'User not found'
+        }
+        return response
     }
 
     // Check if OTP is correct and not expired
@@ -50,7 +73,20 @@ export const verifyOTP = async (email: string, otp: string) => {
         user.isActivated = true;
         user.otp = undefined;
         await user.save();
+        response = {
+            statusCode: 200,
+            message: 'Verify success. Account activated',
+            data: null,
+            error: null
+        }
     } else {
-        throw new Error("Invalid or expired OTP");
+        response = {
+            statusCode: 400,
+            message: 'Invalid or expired OTP',
+            data: null,
+            error: null
+        }
     }
+
+    return response
 };

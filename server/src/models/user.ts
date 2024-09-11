@@ -39,9 +39,24 @@ const UserSchema = new mongoose.Schema<IUser>({
     }
 })
 
+//hash the password before the user is saved
+UserSchema.pre('save', function(next) {
+	const user = this;
+
+	// Hash the password only if the password has been changed or user is new
+	if (!user.isModified('password')) return next();
+
+	bcrypt.hash(user.password, null, null, function(err, hash) {
+		if (err) return next(err);
+
+		user.password = hash;
+		next();
+	});
+});
+
 // method to compare a given password with the database hash
 UserSchema.methods.comparePassword = function(password: string) {
     return bcrypt.compareSync(password, this.password);
 };
 
-export const UserModel = mongoose.model<IUser>("User", UserSchema);
+export const UserModel = mongoose.model("User", UserSchema);

@@ -27,7 +27,7 @@ mongoose.connect(MONGO_URL);
 mongoose.connection.on('error', (error: Error) => console.log(error));
 
 app.use("/api/v1/auth/login", loginRoute());
-app.use("/api/v1/auth/", resetRoute);
+app.use(registerRouter)
 
 // middleware for all
 // app.use(middleware.commonLog);

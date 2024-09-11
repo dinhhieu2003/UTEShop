@@ -2,18 +2,18 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import registerRouter from './routes/registerRoute'
 dotenv.config();
 import loginRoute from './routes/loginRoute';
-import resetRoute from './routes/resetpwRoute';
+import resetpwRouter from './routes/resetpwRoute'
 
 const app = express();
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true })); 
-
+app.use(bodyParser.urlencoded({ extended: true }));
 
 let port = process.env.PORT || 6969;
- 
+
 app.listen(port, () => {
     //callback
     console.log("Backend Nodejs is runing on the port : " + port)
@@ -28,6 +28,7 @@ mongoose.connection.on('error', (error: Error) => console.log(error));
 
 app.use("/api/v1/auth/login", loginRoute());
 app.use(registerRouter)
+app.use("/api/v1", resetpwRouter)
 
 // middleware for all
 // app.use(middleware.commonLog);

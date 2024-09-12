@@ -1,5 +1,5 @@
 import { ApiResponse } from "dto/response/apiResponse"
-import { registerUser, verifyOTP } from "../services/registerService"
+import { registerUser, verifyOTP } from "../../services/auth/registerService"
 import express, {Request, Response} from "express"
 
 

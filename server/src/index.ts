@@ -2,10 +2,8 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import registerRouter from './routes/registerRoute'
+import authRouter from './routes/auth/index'
 dotenv.config();
-import loginRoute from './routes/loginRoute';
-import resetpwRouter from './routes/resetpwRoute'
 
 const app = express();
 
@@ -26,9 +24,7 @@ mongoose.Promise = Promise;
 mongoose.connect(MONGO_URL);
 mongoose.connection.on('error', (error: Error) => console.log(error));
 
-app.use("/api/v1/auth/login", loginRoute());
-app.use(registerRouter)
-app.use("/api/v1", resetpwRouter)
+app.use("/api/v1/auth/", authRouter());
 
 // middleware for all
 // app.use(middleware.commonLog);

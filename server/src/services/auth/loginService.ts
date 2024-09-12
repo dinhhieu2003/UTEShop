@@ -1,5 +1,5 @@
-import { UserModel } from "../models/user";
-import { ApiResponse } from "../dto/response/apiResponse";
+import { UserModel } from "../../models/user";
+import { ApiResponse } from "../../dto/response/apiResponse";
 import jwt from "jsonwebtoken";
 
 

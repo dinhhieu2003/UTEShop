@@ -1,5 +1,5 @@
-import { UserModel } from "../models/user"
-import { sendOtpEmail } from "./emailService"
+import { UserModel } from "../../models/user"
+import { sendOtpEmail } from "../../utils/sendEmail"
 import { ApiResponse } from "dto/response/apiResponse";
 
 const generateOtp = (): string => {

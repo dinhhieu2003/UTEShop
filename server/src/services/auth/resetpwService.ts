@@ -17,7 +17,7 @@ const validatePassword = (password: string): boolean => {
 
 export const generateResetToken = async (email: string) => {
     const user = await UserModel.findOne({ email });
-    let response: ApiResponse;
+    let response: ApiResponse<any>;
 
     if (!user) {
         return response = {
@@ -56,7 +56,7 @@ export const generateResetToken = async (email: string) => {
 export const resetPassword = async (email: string, otp: string, newPassword: string)=> {
     const user = await UserModel.findOne({ email });
 
-    let response: ApiResponse;
+    let response: ApiResponse<any>;
 
     if (!user) {
         return response = {

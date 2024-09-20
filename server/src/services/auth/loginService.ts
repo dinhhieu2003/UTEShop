@@ -1,11 +1,12 @@
 import { UserModel } from "../../models/user";
 import { ApiResponse } from "../../dto/response/apiResponse";
 import jwt from "jsonwebtoken";
+import { LoginResponse } from "dto/response/auth/loginResponse";
 
 
 export const login = async (email: string, password: string) => {
     const user = await UserModel.findOne({ email} );
-    let response: ApiResponse;
+    let response: ApiResponse<LoginResponse>;
     if (!user) {
         response = {
             statusCode: 401,
@@ -48,5 +49,10 @@ const generateRefreshToken = (user: typeof UserModel.prototype) => {
 const generateTokens = (user: typeof UserModel.prototype) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
-    return { accessToken, refreshToken };
+    let loginResponse: LoginResponse = {
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        email: user.email
+    }
+    return loginResponse;
 }

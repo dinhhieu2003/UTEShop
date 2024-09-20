@@ -6,6 +6,7 @@ const generateOtp = (): string => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
+
 const validatePassword = (password: string): boolean => {
     // regex for minimum 6 characters, at least 1 letter and 1 number
     const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/
@@ -14,7 +15,7 @@ const validatePassword = (password: string): boolean => {
 
 export const registerUser = async (fullName: string, email: string, password: string) => {
     const existingUser = await UserModel.findOne({ email });
-    let response: ApiResponse
+    let response: ApiResponse<any>
     if (existingUser) {
         response = {
             statusCode: 400,
@@ -57,7 +58,7 @@ export const registerUser = async (fullName: string, email: string, password: st
 
 export const verifyOTP = async (email: string, otp: string) => {
     const user = await UserModel.findOne({ email });
-    let response: ApiResponse
+    let response: ApiResponse<any>
     if (!user) {
         response = {
             statusCode: 400,

@@ -5,7 +5,7 @@ import express, {Request, Response} from "express"
 
 export const postRegister = async (req: Request, res: Response) => {
   const {fullName, email, password} = req.body
-  let response: ApiResponse
+  let response: ApiResponse<any>
 
   try {
     const registerResponse = await registerUser(fullName, email, password)

@@ -3,12 +3,14 @@ import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import authRouter from './routes/auth/index'
+import cors from 'cors';
 dotenv.config();
 
 const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors());
 
 let port = process.env.PORT || 6969;
 

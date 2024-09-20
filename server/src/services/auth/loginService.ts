@@ -1,7 +1,7 @@
 import { UserModel } from "../../models/user";
 import { ApiResponse } from "../../dto/response/apiResponse";
 import jwt from "jsonwebtoken";
-import { LoginResponse } from "dto/response/auth/loginResponse";
+import { LoginResponse } from "../../dto/response/auth/loginResponse";
 
 
 export const login = async (email: string, password: string) => {
@@ -52,7 +52,16 @@ const generateTokens = (user: typeof UserModel.prototype) => {
     let loginResponse: LoginResponse = {
         accessToken: accessToken,
         refreshToken: refreshToken,
-        email: user.email
+        user: {
+            email: user.email,
+            fullName: user.fullName,
+            address: user.address,
+            role: {
+                id: null,
+                name: null,
+                permissions: null
+            }
+        }
     }
     return loginResponse;
 }

@@ -8,6 +8,7 @@ interface IUser extends mongoose.Document {
     otp: string;
     address: string;
     isActivated: boolean;
+    role: string;
     comparePassword: (password: string) => boolean;
 }
 
@@ -36,7 +37,11 @@ const UserSchema = new mongoose.Schema<IUser>({
     isActivated: {
         type: Boolean,
         required: false
-    }
+    },
+    role: {
+        type: String,
+        enum: ["customer", "admin"],
+      },
 })
 
 //hash the password before the user is saved

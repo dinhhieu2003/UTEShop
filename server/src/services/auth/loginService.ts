@@ -37,12 +37,12 @@ export const login = async (email: string, password: string) => {
 }
 
 const generateAccessToken = (user: typeof UserModel.prototype) => {
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, role: user.role, email: user.email, fullName: user.fullName }, process.env.JWT_SECRET, { expiresIn: '1h' });
     return token;
 }
 
 const generateRefreshToken = (user: typeof UserModel.prototype) => {
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user._id, role: user.role, email: user.email, fullName: user.fullName }, process.env.JWT_SECRET, { expiresIn: '7d' });
     return token;
 }
 
@@ -56,11 +56,7 @@ const generateTokens = (user: typeof UserModel.prototype) => {
             email: user.email,
             fullName: user.fullName,
             address: user.address,
-            role: {
-                id: null,
-                name: null,
-                permissions: null
-            }
+            role: user.role,
         }
     }
     return loginResponse;

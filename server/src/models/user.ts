@@ -1,15 +1,29 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt-nodejs";
 
-interface IUser extends mongoose.Document {
+export interface IUser extends mongoose.Document {
     fullName: string;
     email: string;
     password: string;
     otp: string;
-    address: string;
+    address: IAddress;
     isActivated: boolean;
     role: string;
+    cart: Cart;
+    orders: mongoose.Schema.Types.ObjectId[];
     comparePassword: (password: string) => boolean;
+}
+
+interface Cart {
+    products: string[];
+    totalPrice: number;
+}
+
+export interface IAddress {
+    address: string;
+    city: string;
+    country: string;
+    telephone: string;
 }
 
 const UserSchema = new mongoose.Schema<IUser>({
@@ -28,11 +42,13 @@ const UserSchema = new mongoose.Schema<IUser>({
     otp: {
         type: String,
         required: false,
-        expires: 60 * 5
+        expires: '5m'
     },
     address: {
-        type: String,
-        required: false
+        address: { type: String, required: true },
+        city: { type: String, required: true },
+        country: { type: String, required: true },
+        telephone: { type: String, required: true },
     },
     isActivated: {
         type: Boolean,
@@ -41,7 +57,18 @@ const UserSchema = new mongoose.Schema<IUser>({
     role: {
         type: String,
         enum: ["customer", "admin"],
-      },
+        required: true
+    },
+    cart: {
+        products: { type: [String], required: true },
+        totalPrice: { type: Number, required: true },
+    },
+    orders: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Order",
+        }
+    ]
 })
 
 //hash the password before the user is saved

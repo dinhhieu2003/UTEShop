@@ -1,13 +1,22 @@
-import { UserModel } from "../../models/user";
+import { IUser, UserModel } from "../../models/user";
 import { ApiResponse } from "../../dto/response/apiResponse";
-import { AccountResponse } from "dto/response/auth/accountResponse";
+import { AccountResponse } from "../../dto/response/auth/accountResponse";
+import { BaseService } from "../baseService";
+
+class UserService extends BaseService<IUser> {
+    constructor() {
+        super(UserModel);
+    }
+}
+
+export const userService = new UserService();
 
 export const getUserById = async (id: string) => {
     console.log(id);
-    const user = await UserModel.findById(id);
+    const userResponse = await userService.findById(id);
     let response: ApiResponse<AccountResponse>;
     // convert user to AccountResponse
-    if (!user) {
+    if (userResponse.statusCode === 404) {
         response = {
             statusCode: 404,
             message: 'User not found',
@@ -17,10 +26,10 @@ export const getUserById = async (id: string) => {
         return response;
     }
     const accountResponse: AccountResponse = {
-        email: user.email,
-        fullName: user.fullName,
-        address: user.address,
-        role: user.role
+        email: userResponse.data.email,
+        fullName: userResponse.data.fullName,
+        address: userResponse.data.address,
+        role: userResponse.data.role
     };
     response = {
         statusCode: 200,
@@ -28,6 +37,6 @@ export const getUserById = async (id: string) => {
         data: accountResponse,
         error: null
     }
-    console.log(user);
+    console.log(userResponse);
     return response;
 }

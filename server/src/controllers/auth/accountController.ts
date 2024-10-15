@@ -11,7 +11,9 @@ export const fetchAccount = (request: express.Request, response: express.Respons
     const token = authHeader.split(" ")[1];
     jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
         console.log("verifying");
+        
         if (err) {
+            console.log("Error!!");
             return response.sendStatus(403); //invalid token
         }
         let result = await userService.getUserById((decoded as any).id);

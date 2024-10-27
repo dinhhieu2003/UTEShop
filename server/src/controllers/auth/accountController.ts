@@ -1,22 +1,40 @@
 import express from "express";
-import jwt from "jsonwebtoken";
-import * as userService from "../../services/users/userService";
 
-export const fetchAccount = (request: express.Request, response: express.Response) => {
-    const authHeader = request.headers["authorization"];
-    if(!authHeader) {
-        return response.sendStatus(403);
+import * as userService from "../../services/users/userService";
+import * as tokenUtils from "../../utils/tokenUtils";
+
+
+// Controller to fetch the account details of the authenticated user
+export const fetchAccount = async (request: express.Request, response: express.Response) => {
+    const token = tokenUtils.extractToken(request.headers["authorization"]);
+    
+    if (!token) {
+        return response.sendStatus(403); // Forbidden if no token is provided
     }
-    console.log(authHeader); // Bearer token
-    const token = authHeader.split(" ")[1];
-    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
-        console.log("verifying");
-        
-        if (err) {
-            console.log("Error!!");
-            return response.sendStatus(403); //invalid token
-        }
-        let result = await userService.getUserById((decoded as any).id);
+
+    try {
+        const decoded = await tokenUtils.verifyToken(token);
+        const result = await userService.getUserById((decoded as any).id);
         return response.json(result);
-      });
-}
+    } catch (error) {
+        console.error("Token verification error:", error);
+        return response.sendStatus(403); // Forbidden if token verification fails
+    }
+};
+
+// Utility function to get the current user's ID from the token
+export const getCurrentId = async (request: express.Request): Promise<string | null> => {
+    const token = tokenUtils.extractToken(request.headers["authorization"]);
+    
+    if (!token) {
+        return null;
+    }
+
+    try {
+        const decoded = await tokenUtils.verifyToken(token);
+        return (decoded as any).id;
+    } catch (error) {
+        console.error("Token verification error:", error);
+        return null;
+    }
+};

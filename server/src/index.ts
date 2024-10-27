@@ -3,6 +3,9 @@ import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import authRouter from './routes/auth/index'
+import cartRouter from './routes/cart/index'
+import productRouter from './routes/product/index'
+import categoryRouter from './routes/category/index'
 import cors from 'cors';
 dotenv.config();
 
@@ -27,6 +30,9 @@ mongoose.connect(MONGO_URL);
 mongoose.connection.on('error', (error: Error) => console.log(error));
 
 app.use("/api/v1/auth/", authRouter());
+app.use("/api/v1/carts/", cartRouter());
+app.use("/api/v1/products/", productRouter());
+app.use("/api/v1/categories/", categoryRouter());
 
 // middleware for all
 // app.use(middleware.commonLog);

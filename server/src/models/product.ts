@@ -4,12 +4,19 @@ export interface Product extends mongoose.Document {
     categoryId: mongoose.Schema.Types.ObjectId;  // Reference to Category model
     name: string;
     description: string;
-    price: string;
+    price: number;
     images: string[];
     stock: number;
     isActivated: boolean;
     information: string;
-    reviews: mongoose.Schema.Types.ObjectId[];
+    reviews: IReview[];
+}
+
+export interface IReview {
+    userId: mongoose.Schema.Types.ObjectId;
+    content: string;
+    images: string[];
+    rate: number;
 }
 
 const ProductSchema = new mongoose.Schema<Product>({
@@ -27,7 +34,7 @@ const ProductSchema = new mongoose.Schema<Product>({
         required: true
     },
     price: {
-        type: String,
+        type: Number,
         required: true
     },
     images: {
@@ -49,10 +56,27 @@ const ProductSchema = new mongoose.Schema<Product>({
     },
     reviews: [
         {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Review"  
-        }
-    ]
+            userId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User",
+                required: true,
+            },
+            content: {
+                type: String,
+                required: true,
+            },
+            images: {
+                type: [String],
+                required: false,
+            },
+            rate: {
+                type: Number,
+                required: true,
+                min: 1,
+                max: 5,
+            },
+        },
+    ],
 });
-
+  
 export const ProductModel = mongoose.model<Product>("Product", ProductSchema);

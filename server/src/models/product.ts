@@ -19,7 +19,7 @@ export interface IReview {
     rate: number;
 }
 
-const ProductSchema = new mongoose.Schema<Product>({
+export const ProductSchema = new mongoose.Schema<Product>({
     categoryId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Category",

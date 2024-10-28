@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt-nodejs";
+import { Product, ProductModel, ProductSchema } from "../models/product";
 
 export interface IUser extends mongoose.Document {
     fullName: string;
@@ -9,14 +10,19 @@ export interface IUser extends mongoose.Document {
     address: IAddress;
     isActivated: boolean;
     role: string;
-    cart: Cart;
+    cart: ICart;
     orders: mongoose.Schema.Types.ObjectId[];
     comparePassword: (password: string) => boolean;
 }
 
-interface Cart {
-    products: string[];
+interface ICart {
+    products: IProduct[];
     totalPrice: number;
+}
+
+interface IProduct {
+    product: Product;
+    quantity: number;
 }
 
 export interface IAddress {
@@ -26,6 +32,31 @@ export interface IAddress {
     telephone: string;
 }
 
+const IProductSchema = new mongoose.Schema<IProduct>({
+    product: {
+        type: ProductSchema,
+        required: true,
+    },
+    quantity: {
+        type: Number,
+        required: true,
+        min: 1
+    }
+}, { _id: false });
+
+const CartSchema = new mongoose.Schema<ICart>({
+    products: {
+        type: [IProductSchema],
+        required: true,
+        default: []
+    },
+    totalPrice: {
+        type: Number,
+        required: true,
+        default: 0
+    }
+}, { _id: false });
+
 const UserSchema = new mongoose.Schema<IUser>({
     fullName: {
         type: String,
@@ -33,7 +64,8 @@ const UserSchema = new mongoose.Schema<IUser>({
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     password: {
         type: String,
@@ -45,23 +77,25 @@ const UserSchema = new mongoose.Schema<IUser>({
         expires: '5m'
     },
     address: {
-        address: { type: String, required: true },
-        city: { type: String, required: true },
-        country: { type: String, required: true },
-        telephone: { type: String, required: true },
+        address: { type: String, required: false },
+        city: { type: String, required: false },
+        country: { type: String, required: false },
+        telephone: { type: String, required: false },
     },
     isActivated: {
         type: Boolean,
-        required: false
+        required: false,
+        default: false
     },
     role: {
         type: String,
         enum: ["customer", "admin"],
-        required: true
+        required: false,
     },
     cart: {
-        products: { type: [String], required: true },
-        totalPrice: { type: Number, required: true },
+        type: CartSchema,
+        required: false,
+        default: () => ({ products: [], totalPrice: 0 })
     },
     orders: [
         {
@@ -69,21 +103,21 @@ const UserSchema = new mongoose.Schema<IUser>({
             ref: "Order",
         }
     ]
-})
+});
 
 //hash the password before the user is saved
 UserSchema.pre('save', function(next) {
-	const user = this;
+    const user = this;
 
-	// Hash the password only if the password has been changed or user is new
-	if (!user.isModified('password')) return next();
+    // Hash the password only if the password has been changed or user is new
+    if (!user.isModified('password')) return next();
 
-	bcrypt.hash(user.password, null, null, function(err, hash) {
-		if (err) return next(err);
+    bcrypt.hash(user.password, null, null, function(err, hash) {
+        if (err) return next(err);
 
-		user.password = hash;
-		next();
-	});
+        user.password = hash;
+        next();
+    });
 });
 
 // method to compare a given password with the database hash
@@ -91,4 +125,4 @@ UserSchema.methods.comparePassword = function(password: string) {
     return bcrypt.compareSync(password, this.password);
 };
 
-export const UserModel = mongoose.model("User", UserSchema);
+export const UserModel = mongoose.model<IUser>("User", UserSchema);

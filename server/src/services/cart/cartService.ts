@@ -1,17 +1,16 @@
+import mongoose from "mongoose";
 import { ApiResponse } from "../../dto/response/apiResponse";
 import { ProductModel } from "../../models/product";
 import { IUser, UserModel } from "../../models/user"
 
-export const addToCart = async (userId: string, productId: string) => {
+export const addToCart = async (userId: string, product: any) => {
     let response: ApiResponse<any>;
     try {
         const currentUser = await UserModel.findById(userId);
-        const product = await ProductModel.findById(productId);
-        if (!currentUser.cart) {
-            currentUser.cart = { products: [], totalPrice: 0 };
-        }
-        currentUser.cart.products.push(productId);
-        currentUser.cart.totalPrice += product.price;
+        const currentProduct = await ProductModel.findById(product.productId);
+        const productInCart = {product: currentProduct, quantity: product.quantity};
+        currentUser.cart.products.push(productInCart);
+        currentUser.cart.totalPrice += currentProduct.price * product.quantity;
         await currentUser.save();
         response = {
             statusCode: 200,

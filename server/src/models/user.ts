@@ -90,7 +90,7 @@ const UserSchema = new mongoose.Schema<IUser>({
     role: {
         type: String,
         enum: ["customer", "admin"],
-        required: false,
+        required: true,
     },
     cart: {
         type: CartSchema,

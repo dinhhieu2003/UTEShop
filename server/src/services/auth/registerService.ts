@@ -37,13 +37,14 @@ export const registerUser = async (fullName: string, email: string, password: st
     }
 
     const otp = generateOtp();
-
+    const role = "customer";
     // Create and save new user
     const newUser = new UserModel({
         fullName,
         email,
         password,
         otp,
+        role,
     });
     await newUser.save();
     await sendOtpEmail(email, otp);

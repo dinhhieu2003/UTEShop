@@ -13,3 +13,13 @@ export const addCategory = async (request: express.Request, response: express.Re
         response.status(500).json({ error: error.message });
     }
 }
+
+export const getAllCategory = async (request: express.Request, response: express.Response) => {
+    try {
+        const categoryResponse = await categoryService.getAllCategory();
+        response.json(categoryResponse);
+    } catch (error) {
+        console.log(error);
+        response.status(500).json({error: error.message});
+    }
+}

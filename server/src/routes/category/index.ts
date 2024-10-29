@@ -6,5 +6,6 @@ const router = express.Router();
 
 export default (): express.Router => {
     router.post("", checkAuth, categoryController.addCategory);
+    router.get("", categoryController.getAllCategory)
     return router;
 }

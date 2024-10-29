@@ -1,6 +1,8 @@
 import express from "express";
 import * as productService from "../../services/product/productService"
 import mongoose from "mongoose";
+import { ApiResponse } from "dto/response/apiResponse";
+import { IGetProduct } from "dto/response/types";
 
 export const addProduct = async (request: express.Request, response: express.Response) => {
     try {
@@ -36,5 +38,22 @@ export const addImagesToProduct = async (req: express.Request, res: express.Resp
             message: 'Internal Server Error',
             error: error.message,
         });
+    }
+}
+
+export const getProducts = async (request: express.Request, response: express.Response) => {
+    try {
+        let categoryName: string | undefined = request.query.categoryName as string;
+        let productsResponse: ApiResponse<IGetProduct[]>;
+        if(categoryName) {
+            categoryName = categoryName.split("-").join(" ");
+            productsResponse = await productService.getProductsByCategoryName(categoryName);
+        } else {
+            productsResponse = await productService.getAllProducts();
+        }
+        response.json(productsResponse);
+    } catch (error) {
+        console.log(error);
+        response.status(500).json({ error: error.message });
     }
 }

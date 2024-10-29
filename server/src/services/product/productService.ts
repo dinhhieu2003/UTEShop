@@ -1,8 +1,10 @@
 import { Product, ProductModel } from "../../models/product";
 import { ApiResponse } from "../../dto/response/apiResponse";
-import { CategoryModel } from "models/category";
+import { CategoryModel } from "../../models/category";
 import mongoose from "mongoose";
 import cloudinary from "../../configs/cloudinary";
+import { IGetProduct } from "../../dto/response/types";
+import * as productMapper from "../../mapper/productMapper"
 
 export const addProduct = async(product: Product) => {
     let response: ApiResponse<any>;
@@ -106,3 +108,77 @@ export const addImagesToProduct = async (productId: mongoose.Types.ObjectId, ima
         return response;
     }
 };
+
+export const getProductsByCategoryName = async (categoryName: string) => {
+    let response: ApiResponse<IGetProduct[]>
+    try {
+        const products: Product[] = await ProductModel.find().populate({
+            path: 'categoryId',
+            match: {name: categoryName},
+        })
+        .exec();
+        const filteredProducts = products.filter((product) => product.categoryId !== null);
+        if(filteredProducts.length == 0) {
+            response = {
+                statusCode: 404,
+                message: 'Not found products',
+                data: null,
+                error: "Not found"
+            }
+        } else {
+            const productsResponse:IGetProduct[] = await productMapper.mapProductsToIGetProducts(filteredProducts);
+            response = {
+                statusCode: 200,
+                message: "Get products by category name success",
+                data: productsResponse,
+                error: null
+            }
+        }
+        return response;
+
+    } catch(error) {
+        console.error('Error get products', error);
+        response = {
+            statusCode: 500,
+            message: 'Internal Server Error',
+            data: null,
+            error: error.message
+        };
+        return response;
+    }
+}
+
+export const getAllProducts = async () => {
+    let response: ApiResponse<IGetProduct[]>;
+    try {
+        const products: Product[] = await ProductModel.find().populate({
+            path: 'categoryId',
+        });
+        if(products.length == 0) {
+            response = {
+                statusCode: 404,
+                message: 'Not found products',
+                data: null,
+                error: "Not found"
+            }
+        } else {
+            const productsResponse:IGetProduct[] = await productMapper.mapProductsToIGetProducts(products);
+            response = {
+                statusCode: 200,
+                message: "Get products success",
+                data: productsResponse,
+                error: null
+            }
+        }
+        return response;
+    } catch(error) {
+        console.error('Error get products', error);
+        response = {
+            statusCode: 500,
+            message: 'Internal Server Error',
+            data: null,
+            error: error.message
+        };
+        return response;
+    }
+}

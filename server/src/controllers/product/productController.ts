@@ -2,7 +2,7 @@ import express from "express";
 import * as productService from "../../services/product/productService"
 import mongoose from "mongoose";
 import { ApiResponse } from "dto/response/apiResponse";
-import { IGetProduct } from "dto/response/types";
+import { IGetOneProduct, IGetProduct } from "dto/response/types";
 
 export const addProduct = async (request: express.Request, response: express.Response) => {
     try {
@@ -52,6 +52,18 @@ export const getProducts = async (request: express.Request, response: express.Re
             productsResponse = await productService.getAllProducts();
         }
         response.json(productsResponse);
+    } catch (error) {
+        console.log(error);
+        response.status(500).json({ error: error.message });
+    }
+}
+
+export const getOneProduct = async (request: express.Request, response: express.Response) => {
+    try {
+        const { productId } = request.params;
+        let productResponse: ApiResponse<IGetOneProduct>;
+        productResponse = await productService.getProductById(productId)
+        response.json(productResponse);
     } catch (error) {
         console.log(error);
         response.status(500).json({ error: error.message });

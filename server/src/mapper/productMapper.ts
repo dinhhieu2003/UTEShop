@@ -1,5 +1,5 @@
 import { IReview, Product } from '../models/product';
-import { IGetProduct } from '../dto/response/types';
+import { IGetOneProduct, IGetProduct } from '../dto/response/types';
 import { Category } from '../models/category';
 
 export async function mapProductsToIGetProducts(products: Product[]): Promise<IGetProduct[]> {
@@ -25,6 +25,31 @@ export async function mapProductsToIGetProducts(products: Product[]): Promise<IG
         throw error;
     }
 }
+
+export async function mapProductsToIGetOneProduct(product: Product): Promise<IGetOneProduct> {
+    try {
+        const category = product.categoryId as unknown as { name: string };
+        console.log("mapper: " + category.name);
+
+        const productDto: IGetOneProduct = {
+            id: product._id.toString(),
+            categoryName: category.name,
+            description: product.description,
+            name: product.name,
+            images: product.images,
+            price: product.price,
+            inventoryStatus: product.stock > 0 ? "In Stock" : "Out of Stock",
+            rating: calculateAverageRating(product.reviews),
+            stock: product.stock
+        };
+
+        return productDto;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
 
 // Helper function to calculate average rating
 function calculateAverageRating(reviews: IReview[]): number {

@@ -3,7 +3,7 @@ import { ApiResponse } from "../../dto/response/apiResponse";
 import { CategoryModel } from "../../models/category";
 import mongoose from "mongoose";
 import cloudinary from "../../configs/cloudinary";
-import { IGetProduct } from "../../dto/response/types";
+import { IGetOneProduct, IGetProduct } from "../../dto/response/types";
 import * as productMapper from "../../mapper/productMapper"
 
 export const addProduct = async(product: Product) => {
@@ -173,6 +173,43 @@ export const getAllProducts = async () => {
         return response;
     } catch(error) {
         console.error('Error get products', error);
+        response = {
+            statusCode: 500,
+            message: 'Internal Server Error',
+            data: null,
+            error: error.message
+        };
+        return response;
+    }
+}
+
+export const getProductById = async (productId: string) => {
+    let response: ApiResponse<IGetOneProduct>
+    try {
+        const product: Product = await ProductModel.findOne({ _id: productId }).populate({
+            path: 'categoryId',
+        })
+        .exec();
+        if(!product) {
+            response = {
+                statusCode: 404,
+                message: 'Not found product',
+                data: null,
+                error: "Not found"
+            }
+        } else {
+            const productsResponse:IGetOneProduct = await productMapper.mapProductsToIGetOneProduct(product);
+            response = {
+                statusCode: 200,
+                message: "Get product ok",
+                data: productsResponse,
+                error: null
+            }
+        }
+        return response;
+
+    } catch(error) {
+        console.error('Error get product', error);
         response = {
             statusCode: 500,
             message: 'Internal Server Error',

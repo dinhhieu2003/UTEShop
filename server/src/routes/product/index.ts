@@ -9,5 +9,6 @@ export default (): express.Router => {
     router.get("", productController.getProducts);
     router.post("", checkAuth, productController.addProduct);
     router.post("/:productId/images", upload.array("images", 10), productController.addImagesToProduct);
+    router.get("/:productId", productController.getOneProduct);
     return router;
 }

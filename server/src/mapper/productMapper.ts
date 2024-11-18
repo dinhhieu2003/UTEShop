@@ -7,7 +7,6 @@ export async function mapProductsToIGetProducts(products: Product[]): Promise<IG
         // Map each product to IGetProduct
         const productDtos: IGetProduct[] = products.map((product) => {
             const category = product.categoryId as unknown as { name: string };
-            console.log("mapper: " + category.name);
             return {
                 id: product._id.toString(),
                 categoryName: category.name,
@@ -29,7 +28,6 @@ export async function mapProductsToIGetProducts(products: Product[]): Promise<IG
 export async function mapProductsToIGetOneProduct(product: Product): Promise<IGetOneProduct> {
     try {
         const category = product.categoryId as unknown as { name: string };
-        console.log("mapper: " + category.name);
 
         const productDto: IGetOneProduct = {
             id: product._id.toString(),

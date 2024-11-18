@@ -19,3 +19,16 @@ export type IGetOneProduct = {
     rating: number,
     stock: number;
 }
+
+export type ICartItem = {
+    id: string,
+    image: string,
+    name: string,
+    quantity: number,
+    available: number,
+    price: number
+}
+
+export type IGetCart = {
+    cartItems: ICartItem[],
+}

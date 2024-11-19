@@ -15,7 +15,7 @@ export const createOrder = async (userId: string, cartItems: ICartItem[], totalP
                 statusCode: 404,
                 message: 'User not found',
                 data: null,
-                error: 'User not found'
+                error: 'User not found',
             };
         }
 
@@ -28,21 +28,35 @@ export const createOrder = async (userId: string, cartItems: ICartItem[], totalP
                     statusCode: 404,
                     message: `Product with id ${item.id} not found`,
                     data: null,
-                    error: `Product with id ${item.id} not found`
+                    error: `Product with id ${item.id} not found`,
                 };
             }
 
+            // Kiểm tra stock
+            if (product.stock < item.quantity) {
+                return {
+                    statusCode: 400,
+                    message: `Insufficient stock for product ${product.name}`,
+                    data: null,
+                    error: `Insufficient stock for product ${product.name}`,
+                };
+            }
+
+            // Trừ stock
+            product.stock -= item.quantity;
+            await product.save();
+
             products.push({
                 productId: new mongoose.Types.ObjectId(item.id),
-                quantity: item.quantity
+                quantity: item.quantity,
             });
         }
 
         const newOrder = new OrderModel({
             products: products,
             totalPrice: totalPrice,
-            status: "place order",
-            createdAt: new Date()
+            status: 'place order',
+            createdAt: new Date(),
         });
 
         await newOrder.save();
@@ -54,16 +68,15 @@ export const createOrder = async (userId: string, cartItems: ICartItem[], totalP
             statusCode: 201,
             message: 'Order created successfully',
             data: newOrder,
-            error: null
+            error: null,
         };
-
     } catch (error) {
         console.error('Error creating order:', error);
         response = {
             statusCode: 500,
             message: 'Internal Server Error',
             data: null,
-            error: error.message
+            error: error.message,
         };
     }
 

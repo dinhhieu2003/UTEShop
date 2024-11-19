@@ -7,6 +7,7 @@ import cartRouter from './routes/cart/index'
 import productRouter from './routes/product/index'
 import categoryRouter from './routes/category/index'
 import userRouter from './routes/user/index'
+import orderRouter from './routes/order/index'
 import cors from 'cors';
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use("/api/v1/carts/", cartRouter());
 app.use("/api/v1/products/", productRouter());
 app.use("/api/v1/categories/", categoryRouter());
 app.use("/api/v1/users/", userRouter());
+app.use("/api/v1/orders/", orderRouter());
 
 // middleware for all
 // app.use(middleware.commonLog);

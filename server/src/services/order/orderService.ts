@@ -5,7 +5,7 @@ import { ProductModel } from "../../models/product";
 import mongoose from "mongoose";
 import { OrderModel } from "../../models/order";
 
-export const createOrder = async (userId: string, cartItems: ICartItem[]) => {
+export const createOrder = async (userId: string, cartItems: ICartItem[], totalPrice: number) => {
     let response: ApiResponse<any>;
 
     try {
@@ -20,7 +20,6 @@ export const createOrder = async (userId: string, cartItems: ICartItem[]) => {
         }
 
         const products = [];
-        let totalPrice = 0;
 
         for (const item of cartItems) {
             const product = await ProductModel.findById(item.id);
@@ -33,7 +32,6 @@ export const createOrder = async (userId: string, cartItems: ICartItem[]) => {
                 };
             }
 
-            totalPrice += item.price * item.quantity;
             products.push({
                 productId: new mongoose.Types.ObjectId(item.id),
                 quantity: item.quantity
@@ -49,6 +47,9 @@ export const createOrder = async (userId: string, cartItems: ICartItem[]) => {
 
         await newOrder.save();
 
+        currentUser.orders.push(newOrder.id);
+        await currentUser.save();
+
         response = {
             statusCode: 201,
             message: 'Order created successfully',
@@ -63,6 +64,108 @@ export const createOrder = async (userId: string, cartItems: ICartItem[]) => {
             message: 'Internal Server Error',
             data: null,
             error: error.message
+        };
+    }
+
+    return response;
+};
+
+export const getOrderItems = async (orderId: string) => {
+    let response: ApiResponse<any>;
+
+    try {
+        const order = await OrderModel.findById(orderId).populate("products.productId");
+        if (!order) {
+            return {
+                statusCode: 404,
+                message: 'Order not found',
+                data: null,
+                error: 'Order not found'
+            };
+        }
+
+        const orderItems = order.products.map((item: any) => {
+            return {
+                id: item._id,
+                productId: item.productId._id,
+                image: item.productId.images[0] || "",
+                name: item.productId.name,
+                quantity: item.quantity,
+                price: item.productId.price,
+            };
+        });
+
+        response = {
+            statusCode: 200,
+            message: 'Order items retrieved successfully',
+            data: orderItems,
+            error: null
+        };
+
+    } catch (error) {
+        console.error('Error retrieving order items:', error);
+        response = {
+            statusCode: 500,
+            message: 'Internal Server Error',
+            data: null,
+            error: error.message
+        };
+    }
+
+    return response;
+};
+
+export const getOrderHistory = async (userId: string) => {
+    let response: ApiResponse<any>;
+
+    try {
+        // Tìm kiếm user
+        const currentUser = await UserModel.findById(userId).populate('orders').exec();
+        if (!currentUser) {
+            return {
+                statusCode: 404,
+                message: 'User not found',
+                data: null,
+                error: 'User not found',
+            };
+        }
+
+        const orders = await OrderModel.find({ _id: { $in: currentUser.orders } }).exec();
+
+        const orderHistory = orders.map(order => ({
+            orderNumber: order._id.toString(),
+            orderDate: order.createdAt.toLocaleDateString('en-US', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+            }),
+            totalAmount: `$${order.totalPrice.toFixed(2)}`,
+            items: order.products.map((product:any) => ({
+                image: product.productId?.images || '',
+                name: product.productId?.name || '',
+                price: `$${(product.productId?.price || 0).toFixed(2)}`,
+                status: order.status,
+                date: order.createdAt.toLocaleDateString('en-US', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                }),
+            })),
+        }));
+
+        response = {
+            statusCode: 200,
+            message: 'Order history fetched successfully',
+            data: orderHistory,
+            error: null,
+        };
+    } catch (error) {
+        console.error('Error fetching order history:', error);
+        response = {
+            statusCode: 500,
+            message: 'Internal Server Error',
+            data: null,
+            error: error.message,
         };
     }
 

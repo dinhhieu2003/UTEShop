@@ -34,7 +34,15 @@ export const deleteProduct = async (request: express.Request, response: express.
 export const addProduct = async (request: express.Request, response: express.Response) => {
     try {
         const product = request.body;
-        const productResponse = await productService.addProduct(product);
+        if (!request.files || !Array.isArray(request.files)) {
+            return response.status(400).json({
+                message: 'No images uploaded',
+                error: 'Bad Request',
+            });
+        }
+
+        const imagePaths = (request.files as Express.Multer.File[]).map(file => file.path);
+        const productResponse = await productService.addProduct(product, imagePaths);
         if(productResponse.statusCode == 201) {
             const productName = productResponse.data.name;
             broadcast(null, {
@@ -50,32 +58,6 @@ export const addProduct = async (request: express.Request, response: express.Res
     } catch (error) {
         console.log(error);
         response.status(500).json({ error: error.message });
-    }
-}
-
-export const addImagesToProduct = async (req: express.Request, res: express.Response) => {
-    try {
-        const { productId } = req.params;
-        if (!req.files || !Array.isArray(req.files)) {
-            return res.status(400).json({
-                message: 'No images uploaded',
-                error: 'Bad Request',
-            });
-        }
-
-        const imagePaths = (req.files as Express.Multer.File[]).map(file => file.path);
-        const response: any = await productService.addImagesToProduct(new mongoose.Types.ObjectId(productId), imagePaths);
-        return res.status(response.statusCode).json({
-            message: response.message,
-            data: response.data,
-            error: response.error,
-        });
-    } catch (error: any) {
-        console.error('Error in addImagesToProduct controller:', error);
-        return res.status(500).json({
-            message: 'Internal Server Error',
-            error: error.message,
-        });
     }
 }
 

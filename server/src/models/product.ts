@@ -31,7 +31,7 @@ export const ProductSchema = new mongoose.Schema<Product>({
     },
     description: {
         type: String,
-        required: true
+        required: false
     },
     price: {
         type: Number,

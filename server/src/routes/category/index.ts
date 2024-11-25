@@ -5,6 +5,8 @@ import * as categoryController from "../../controllers/category/categoryControll
 const router = express.Router();
 
 export default (): express.Router => {
+    router.put("/:categoryId", checkAuth, categoryController.updateCategory);
+    router.delete("/:id", checkAuth, categoryController.deleteCategory);
     router.post("", checkAuth, categoryController.addCategory);
     router.get("", categoryController.getAllCategory)
     return router;

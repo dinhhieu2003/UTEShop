@@ -36,3 +36,13 @@ export const getOrderHistory = async(request: express.Request, response: express
         response.status(500).json({ error: error.message });
     }
 }
+
+export const getAllOrdersController = async (request: express.Request, response: express.Response) => {
+    try {
+        const ordersResponse = await orderService.getAllOrders();
+        response.json(ordersResponse); 
+    } catch (error) {
+        console.log(error);
+        response.status(500).json({ error: error.message });
+    }
+};

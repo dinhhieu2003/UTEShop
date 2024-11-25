@@ -6,6 +6,7 @@ const router = express.Router();
 
 export default (): express.Router => {
     router.get("", authMiddle.checkAuth, userController.getAddress);
+    router.get('/users', authMiddle.checkAuth, userController.getAllUsers);
     router.put("", authMiddle.checkAuth, userController.updateUser);
     return router;
 }

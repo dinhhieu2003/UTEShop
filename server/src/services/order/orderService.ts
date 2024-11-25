@@ -143,7 +143,13 @@ export const getOrderHistory = async (userId: string) => {
             };
         }
 
-        const orders = await OrderModel.find({ _id: { $in: currentUser.orders } }).exec();
+        const orders = await OrderModel.find({ _id: { $in: currentUser.orders } })
+            .populate({
+                path: "products.productId", // Đường dẫn đến productId trong products
+                model: "Product", // Model cần populate
+                select: "images name price", // Chỉ chọn các field cần thiết để giảm băng thông
+            })
+            .exec();
 
         const orderHistory = orders.map(order => ({
             orderNumber: order._id.toString(),
@@ -153,7 +159,107 @@ export const getOrderHistory = async (userId: string) => {
                 year: 'numeric',
             }),
             totalAmount: `$${order.totalPrice.toFixed(2)}`,
-            items: order.products.map((product:any) => ({
+            status: order.status,
+            items: order.products.map((product: any) => ({
+                image: product.productId?.images || [],
+                name: product.productId?.name || "Unknown Product",
+                price: (product.productId?.price || 0).toFixed(2) as number,
+                quantity: product.quantity
+            })),
+        }));
+
+        response = {
+            statusCode: 200,
+            message: 'Order history fetched successfully',
+            data: orderHistory,
+            error: null,
+        };
+    } catch (error) {
+        console.error('Error fetching order history:', error);
+        response = {
+            statusCode: 500,
+            message: 'Internal Server Error',
+            data: null,
+            error: error.message,
+        };
+    }
+
+    return response;
+};
+
+export const getOrder = async (orderId: string) => {
+    let response: ApiResponse<any>;
+
+    try {
+        const order = await OrderModel.findById(orderId)
+        .populate({
+            path: "products.productId", // Đường dẫn đến productId trong products
+            model: "Product", // Model cần populate
+            select: "images name price", // Chỉ chọn các field cần thiết để giảm băng thông
+        })
+        .exec()
+
+        const orderResponse = {
+            orderNumber: order._id.toString(),
+            orderDate: order.createdAt.toLocaleDateString('en-US', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+            }),
+            totalAmount: `$${order.totalPrice.toFixed(2)}`,
+            status: order.status,
+            items: order.products.map((product: any) => ({
+                image: product.productId?.images || [],
+                name: product.productId?.name || "Unknown Product",
+                price: (product.productId?.price || 0).toFixed(2) as number,
+                quantity: product.quantity
+            }))
+        };
+
+        response = {
+            statusCode: 200,
+            message: 'Order fetched successfully',
+            data: orderResponse,
+            error: null,
+        };
+    } catch (error) {
+        console.error('Error fetching order :', error);
+        response = {
+            statusCode: 500,
+            message: 'Internal Server Error',
+            data: null,
+            error: error.message,
+        };
+    }
+
+    return response;
+};
+
+export const getAllOrders = async (): Promise<ApiResponse<any>> => {
+    let response: ApiResponse<any>;
+
+    try {
+        // Truy vấn tất cả đơn hàng trong cơ sở dữ liệu
+        const orders = await OrderModel.find().populate('products.productId').exec();
+
+        if (!orders || orders.length === 0) {
+            return {
+                statusCode: 404,
+                message: 'No orders found',
+                data: null,
+                error: 'No orders found',
+            };
+        }
+
+        const orderHistory = orders.map(order => ({
+            orderNumber: order._id.toString(),
+            orderDate: order.createdAt.toLocaleDateString('en-US', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+            }),
+            totalAmount: `$${order.totalPrice.toFixed(2)}`,
+            items: order.products.map((product: any) => ({
                 image: product.productId?.images || '',
                 name: product.productId?.name || '',
                 price: `$${(product.productId?.price || 0).toFixed(2)}`,
@@ -168,12 +274,12 @@ export const getOrderHistory = async (userId: string) => {
 
         response = {
             statusCode: 200,
-            message: 'Order history fetched successfully',
+            message: 'Orders fetched successfully',
             data: orderHistory,
             error: null,
         };
     } catch (error) {
-        console.error('Error fetching order history:', error);
+        console.error('Error fetching orders:', error);
         response = {
             statusCode: 500,
             message: 'Internal Server Error',

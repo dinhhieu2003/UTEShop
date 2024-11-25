@@ -10,5 +10,7 @@ export default (): express.Router => {
     router.post("", checkAuth, productController.addProduct);
     router.post("/:productId/images", upload.array("images", 10), productController.addImagesToProduct);
     router.get("/:productId", productController.getOneProduct);
+    router.delete("/:id", checkAuth, productController.deleteProduct);
+    router.put("/:id", checkAuth, productController.editProduct);
     return router;
 }

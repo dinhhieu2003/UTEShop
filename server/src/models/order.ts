@@ -32,9 +32,9 @@ const OrderSchema = new mongoose.Schema<Order>({
             "place order", 
             "confirmed", 
             "packaging", 
-            "delivering", 
-            "success delivery", 
-            "cancel order"
+            "shipping", 
+            "delivered", 
+            "canceled"
         ],
         default: "place order", // Default status when creating a new order
         required: true

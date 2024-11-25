@@ -6,6 +6,74 @@ import cloudinary from "../../configs/cloudinary";
 import { IGetOneProduct, IGetProduct } from "../../dto/response/types";
 import * as productMapper from "../../mapper/productMapper"
 
+export const editProduct = async (productId: string, updatedProduct: Partial<Product>) => {
+    let response: ApiResponse<any>;
+    try {
+        const existingProduct = await ProductModel.findById(productId);
+        if (!existingProduct) {
+            response = {
+                statusCode: 404,
+                message: 'Product not found',
+                data: null,
+                error: 'Not Found'
+            };
+            return response;
+        }
+
+        Object.assign(existingProduct, updatedProduct);
+        const savedProduct = await existingProduct.save();
+
+        response = {
+            statusCode: 200,
+            message: 'Product updated successfully',
+            data: savedProduct,
+            error: null
+        };
+        return response;
+    } catch (error) {
+        console.error('Error updating product:', error);
+        response = {
+            statusCode: 500,
+            message: 'Internal Server Error',
+            data: null,
+            error: error.message
+        };
+    }
+    return response;
+};
+
+export const deleteProduct = async (productId: string) => {
+    let response: ApiResponse<any>;
+    try {
+        const deletedProduct = await ProductModel.findByIdAndDelete(productId);
+        if (!deletedProduct) {
+            response = {
+                statusCode: 404,
+                message: 'Product not found',
+                data: null,
+                error: 'Not Found'
+            };
+            return response;
+        }
+        response = {
+            statusCode: 200,
+            message: 'Product deleted successfully',
+            data: deletedProduct,
+            error: null
+        };
+        return response;
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        response = {
+            statusCode: 500,
+            message: 'Internal Server Error',
+            data: null,
+            error: error.message
+        };
+    }
+    return response;
+};
+
 export const addProduct = async(product: Product) => {
     let response: ApiResponse<any>;
     try {

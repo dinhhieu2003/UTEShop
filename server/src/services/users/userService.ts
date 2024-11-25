@@ -2,6 +2,7 @@ import { IAddress, IUser, UserModel } from "../../models/user";
 import { ApiResponse } from "../../dto/response/apiResponse";
 import { AccountResponse } from "../../dto/response/auth/accountResponse";
 import { BaseService } from "../baseService";
+import * as tokenUtils from "../../utils/tokenUtils";
 
 class UserService extends BaseService<IUser> {
     constructor() {
@@ -137,3 +138,13 @@ export const updateUser = async (user: IUser) => {
 
     return response;
 };
+
+export const getUserIdByToken = async (token: string) => {
+    try {
+        const decoded = await tokenUtils.verifyToken(token);
+        return (decoded as any).id;
+    } catch (error) {
+        console.error("Token verification error:", error);
+        return null;
+    }
+}

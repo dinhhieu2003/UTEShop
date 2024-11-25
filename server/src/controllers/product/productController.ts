@@ -3,6 +3,9 @@ import * as productService from "../../services/product/productService"
 import mongoose from "mongoose";
 import { ApiResponse } from "dto/response/apiResponse";
 import { IGetOneProduct, IGetProduct } from "dto/response/types";
+import { broadcast } from "../../services/notification/notification";
+import { UserModel } from "../../models/user";
+import { sendEmail } from "../../utils/sendEmail";
 
 export const editProduct = async (request: express.Request, response: express.Response) => {
     try {
@@ -32,6 +35,17 @@ export const addProduct = async (request: express.Request, response: express.Res
     try {
         const product = request.body;
         const productResponse = await productService.addProduct(product);
+        if(productResponse.statusCode == 201) {
+            const productName = productResponse.data.name;
+            broadcast(null, {
+                type: "NEW PRODUCT",
+                payload: `Vừa có một sản phẩm mới tên: ${productName}`,
+            });
+            const users = await UserModel.find({ role: "customer" });
+            users.forEach(async (user) => {
+                await sendEmail(user.email, "NEW PRODUCT !!", "", `Vừa có sản phẩm mới tên ${productResponse.data.name}`);
+            });
+        }
         response.json(productResponse);
     } catch (error) {
         console.log(error);

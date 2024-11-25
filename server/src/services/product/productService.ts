@@ -74,108 +74,69 @@ export const deleteProduct = async (productId: string) => {
     return response;
 };
 
-export const addProduct = async(product: Product) => {
+export const addProduct = async(product: Product, imagePaths: string[]) => {
     let response: ApiResponse<any>;
+
     try {
-        const name: string = product.name;
-        const categoryId = product.categoryId;
-        const existedProduct = await ProductModel.findOne({name, categoryId});
-        if(existedProduct) {
+        const { name, categoryId } = product;
+
+        // 1. Kiểm tra nếu sản phẩm đã tồn tại
+        const existedProduct = await ProductModel.findOne({ name, categoryId });
+        if (existedProduct) {
             response = {
                 statusCode: 400,
-                message: 'Product already exist',
+                message: 'Product already exists',
                 data: null,
-                error: "Bad request"
-            }
-            return response;
-        }
-        const newProduct = await ProductModel.create(product);
-        response = {
-            statusCode: 201,
-            message: 'Product created successfully',
-            data: newProduct,
-            error: null
-        }
-        return response;
-    } catch (error) {
-        console.error('Error add new product', error);
-        response = {
-            statusCode: 500,
-            message: 'Internal Server Error',
-            data: null,
-            error: error.message
-        };
-    }
-    return response;
-}
-
-export const addImagesToProduct = async (productId: mongoose.Types.ObjectId, imagePaths: string[]) => {
-    let response: ApiResponse<any>;
-
-    // Kiểm tra nếu không có imagePaths
-    if (!imagePaths || imagePaths.length === 0) {
-        return {
-            statusCode: 400,
-            message: 'No images provided',
-            data: null,
-            error: 'Bad Request'
-        };
-    }
-
-    try {
-        // Upload các ảnh lên Cloudinary
-        const uploadPromises = imagePaths.map((imagePath) =>
-            cloudinary.uploader.upload(imagePath, {
-                folder: 'products',
-                resource_type: 'image', // Loại file
-                quality: 'auto', // Tùy chọn chất lượng
-                format: 'jpg', // Chuyển đổi định dạng file
-            })
-        );
-        
-        const uploadResults = await Promise.all(uploadPromises);
-        const imageUrls = uploadResults.map(result => result.secure_url);
-
-        // Cập nhật sản phẩm trong MongoDB
-        const updatedProduct = await ProductModel.findByIdAndUpdate(
-            productId,
-            { $push: { images: { $each: imageUrls } } },
-            { new: true }
-        );
-
-        // Kiểm tra nếu không tìm thấy sản phẩm
-        if (!updatedProduct) {
-            response = {
-                statusCode: 404,
-                message: 'Product not found',
-                data: null,
-                error: 'Not Found'
+                error: 'Bad request',
             };
             return response;
         }
 
-        // Thành công
+        // 2. Tạo sản phẩm mới
+        const newProduct = await ProductModel.create(product);
+
+        // 3. Nếu có ảnh, tải lên Cloudinary
+        let imageUrls: string[] = [];
+        if (imagePaths && imagePaths.length > 0) {
+            const uploadPromises = imagePaths.map((imagePath) =>
+                cloudinary.uploader.upload(imagePath, {
+                    folder: 'products',
+                    resource_type: 'image',
+                    quality: 'auto',
+                    format: 'jpg',
+                })
+            );
+            const uploadResults = await Promise.all(uploadPromises);
+            imageUrls = uploadResults.map((result) => result.secure_url);
+        }
+
+        // 4. Cập nhật các liên kết ảnh vào sản phẩm
+        if (imageUrls.length > 0) {
+            newProduct.images = imageUrls; // Nếu bạn có trường `images` trong schema
+            await newProduct.save();
+        }
+
+        // 5. Trả về phản hồi thành công
         response = {
-            statusCode: 200,
-            message: 'Images added successfully to product',
-            data: updatedProduct,
-            error: null
+            statusCode: 201,
+            message: 'Product created successfully with images',
+            data: newProduct,
+            error: null,
         };
         return response;
 
     } catch (error: any) {
-        console.error('Error adding images to product:', error);
+        console.error('Error adding product with images:', error);
 
-        // Xử lý lỗi cụ thể hơn nếu cần
         response = {
             statusCode: 500,
             message: 'Internal Server Error',
             data: null,
-            error: error.message || 'Unknown error'
+            error: error.message || 'Unknown error',
         };
         return response;
     }
-};
+}
 
 export const getProductsByCategoryName = async (categoryName: string) => {
     let response: ApiResponse<IGetProduct[]>

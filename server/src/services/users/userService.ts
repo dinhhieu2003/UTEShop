@@ -2,6 +2,7 @@ import { IAddress, IUser, UserModel } from "../../models/user";
 import { ApiResponse } from "../../dto/response/apiResponse";
 import { AccountResponse } from "../../dto/response/auth/accountResponse";
 import { BaseService } from "../baseService";
+import * as tokenUtils from "../../utils/tokenUtils";
 
 class UserService extends BaseService<IUser> {
     constructor() {
@@ -10,6 +11,38 @@ class UserService extends BaseService<IUser> {
 }
 
 export const userService = new UserService();
+export const getAllUsers = async () => {
+    const usersResponse = await userService.findAll();
+    let response: ApiResponse<AccountResponse[]>;
+
+    if (usersResponse.statusCode === 404) {
+        response = {
+            statusCode: 404,
+            message: 'No users found',
+            data: [],
+            error: "Bad Request"
+        };
+        return response;
+    }
+
+    // Convert user list to AccountResponse array
+    const accountResponses: AccountResponse[] = usersResponse.data.map((user: any) => ({
+        email: user.email,
+        fullName: user.fullName,
+        address: user.address,
+        role: user.role
+    }));
+
+    response = {
+        statusCode: 200,
+        message: 'Fetch all users success',
+        data: accountResponses,
+        error: null
+    };
+
+    return response;
+};
+
 
 export const getUserById = async (id: string) => {
     console.log(id);
@@ -37,7 +70,6 @@ export const getUserById = async (id: string) => {
         data: accountResponse,
         error: null
     }
-    console.log(userResponse);
     return response;
 }
 
@@ -66,11 +98,11 @@ export const getAddress = async (userId: string) => {
     return response;
 }
 
-export const updateUser = async (userId: string, user: IUser) => {
+export const updateUser = async (user: IUser) => {
     let response: ApiResponse<IUser>;
 
     try {
-        const existingUser = await UserModel.findById(userId);
+        const existingUser = await UserModel.findOne({ email: user.email });
         if (!existingUser) {
             return {
                 statusCode: 404,
@@ -106,3 +138,13 @@ export const updateUser = async (userId: string, user: IUser) => {
 
     return response;
 };
+
+export const getUserIdByToken = async (token: string) => {
+    try {
+        const decoded = await tokenUtils.verifyToken(token);
+        return (decoded as any).id;
+    } catch (error) {
+        console.error("Token verification error:", error);
+        return null;
+    }
+}

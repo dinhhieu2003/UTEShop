@@ -234,3 +234,59 @@ export const getOrder = async (orderId: string) => {
 
     return response;
 };
+
+export const getAllOrders = async (): Promise<ApiResponse<any>> => {
+    let response: ApiResponse<any>;
+
+    try {
+        // Truy vấn tất cả đơn hàng trong cơ sở dữ liệu
+        const orders = await OrderModel.find().populate('products.productId').exec();
+
+        if (!orders || orders.length === 0) {
+            return {
+                statusCode: 404,
+                message: 'No orders found',
+                data: null,
+                error: 'No orders found',
+            };
+        }
+
+        const orderHistory = orders.map(order => ({
+            orderNumber: order._id.toString(),
+            orderDate: order.createdAt.toLocaleDateString('en-US', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+            }),
+            totalAmount: `$${order.totalPrice.toFixed(2)}`,
+            items: order.products.map((product: any) => ({
+                image: product.productId?.images || '',
+                name: product.productId?.name || '',
+                price: `$${(product.productId?.price || 0).toFixed(2)}`,
+                status: order.status,
+                date: order.createdAt.toLocaleDateString('en-US', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                }),
+            })),
+        }));
+
+        response = {
+            statusCode: 200,
+            message: 'Orders fetched successfully',
+            data: orderHistory,
+            error: null,
+        };
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        response = {
+            statusCode: 500,
+            message: 'Internal Server Error',
+            data: null,
+            error: error.message,
+        };
+    }
+
+    return response;
+};

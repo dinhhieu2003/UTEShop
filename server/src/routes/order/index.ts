@@ -8,5 +8,6 @@ export default (): express.Router => {
     router.post("", checkAuth, orderController.createOrder);
     router.get("/items/:orderId", checkAuth, orderController.getOrderItems);
     router.get("/history", checkAuth, orderController.getOrderHistory);
+    router.get("/:orderId", checkAuth, orderController.getOrder);
     return router;
 }

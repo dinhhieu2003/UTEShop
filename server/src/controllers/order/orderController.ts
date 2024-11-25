@@ -36,3 +36,14 @@ export const getOrderHistory = async(request: express.Request, response: express
         response.status(500).json({ error: error.message });
     }
 }
+
+export const getOrder = async(request: express.Request, response: express.Response) => {
+    try {
+        const {orderId} = request.params;
+        const orderResponse = await orderService.getOrder(orderId);
+        response.json(orderResponse);
+    } catch (error) {
+        console.log(error);
+        response.status(500).json({ error: error.message });
+    }
+}

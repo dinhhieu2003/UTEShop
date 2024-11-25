@@ -192,12 +192,12 @@ export const getOrder = async (orderId: string) => {
 
     try {
         const order = await OrderModel.findById(orderId)
-        .populate({
-            path: "products.productId", // Đường dẫn đến productId trong products
-            model: "Product", // Model cần populate
-            select: "images name price", // Chỉ chọn các field cần thiết để giảm băng thông
-        })
-        .exec()
+            .populate({
+                path: "products.productId", // Đường dẫn đến productId trong products
+                model: "Product", // Model cần populate
+                select: "images name price", // Chỉ chọn các field cần thiết để giảm băng thông
+            })
+            .exec()
 
         const orderResponse = {
             orderNumber: order._id.toString(),
@@ -259,17 +259,13 @@ export const getAllOrders = async (): Promise<ApiResponse<any>> => {
                 year: 'numeric',
             }),
             totalAmount: `$${order.totalPrice.toFixed(2)}`,
+            status: order.status,
             items: order.products.map((product: any) => ({
-                image: product.productId?.images || '',
-                name: product.productId?.name || '',
-                price: `$${(product.productId?.price || 0).toFixed(2)}`,
-                status: order.status,
-                date: order.createdAt.toLocaleDateString('en-US', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                }),
-            })),
+                image: product.productId?.images || [],
+                name: product.productId?.name || "Unknown Product",
+                price: (product.productId?.price || 0).toFixed(2) as number,
+                quantity: product.quantity
+            }))
         }));
 
         response = {
@@ -290,3 +286,51 @@ export const getAllOrders = async (): Promise<ApiResponse<any>> => {
 
     return response;
 };
+
+export const changeOrderStaus = async (orderId: string, status: string) => {
+    let response: ApiResponse<any>
+
+    try {
+        const order = await OrderModel.findById(orderId).exec()
+
+        order.status = status
+        order.save()
+
+        response = {
+            statusCode: 200,
+            message: 'Order changed successfully',
+            data: null,
+            error: null,
+        };
+    } catch (error) {
+        console.error('Error changing order :', error);
+        response = {
+            statusCode: 500,
+            message: 'Internal Server Error',
+            data: null,
+            error: error.message,
+        };
+    }
+
+    return response;
+};
+
+export const getQuarterlyRevenueStatistics = async () => {
+    const deliveredOrders = await OrderModel.find({ status: "delivered" })
+    const quarterlyRevenue = [0, 0, 0, 0]
+
+    deliveredOrders.forEach((order) => {
+        const month = order.createdAt.getMonth()
+        const quater = Math.floor(month / 3) // Tính quý: 0: Q1 - 1: Q2 - 2: Q3 - 3: Q4
+        quarterlyRevenue[quater] += order.totalPrice
+    })
+
+    const response: ApiResponse<any> = {
+        statusCode: 200,
+        message: 'Fetch Revenue successfully',
+        data: quarterlyRevenue,
+        error: null,
+    }
+
+    return response
+}

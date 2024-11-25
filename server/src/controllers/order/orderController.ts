@@ -74,4 +74,25 @@ export const getAllOrdersController = async (request: express.Request, response:
         console.log(error);
         response.status(500).json({ error: error.message });
     }
-};
+}
+
+export const changeOrderStatus = async (request: express.Request, response: express.Response) => {
+    try {
+        const {orderId, status} = request.body
+        const ordersResponse = await orderService.changeOrderStaus(orderId, status)
+        response.json(ordersResponse);
+    } catch (error) {
+        console.log(error)
+        response.status(500).json({ error: error.message })
+    }
+}
+
+export const getRevenueStatistics = async (request: express.Request, response: express.Response) => {
+    try {
+        const ordersResponse = await orderService.getQuarterlyRevenueStatistics()
+        response.json(ordersResponse);
+    } catch (error) {
+        console.log(error)
+        response.status(500).json({ error: error.message })
+    }
+}

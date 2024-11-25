@@ -2,7 +2,7 @@ import express from "express";
 import * as couponService from "../../services/coupon/couponService";
 import { broadcast } from "../../services/notification/notification";
 import { UserModel } from "../../models/user";
-import { sendEmail } from "utils/sendEmail";
+import { sendEmail } from "../../utils/sendEmail";
 
 export const createCoupon = async(request: express.Request, response: express.Response) => {
     try {

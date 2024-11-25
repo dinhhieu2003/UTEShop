@@ -9,6 +9,9 @@ export default (): express.Router => {
     router.get('', checkAuth, orderController.getAllOrdersController);
     router.get("/items/:orderId", checkAuth, orderController.getOrderItems);
     router.get("/history", checkAuth, orderController.getOrderHistory);
+    router.get("/revenue-statistics", checkAuth, orderController.getRevenueStatistics);
+    router.post("/update/status", checkAuth, orderController.changeOrderStatus);
+
     router.get("/:orderId", checkAuth, orderController.getOrder);
     return router;
 }

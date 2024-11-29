@@ -57,6 +57,7 @@ export const createOrder = async (userId: string, cartItems: ICartItem[], totalP
             totalPrice: totalPrice,
             status: 'place order',
             createdAt: new Date(),
+            userId: userId
         });
 
         await newOrder.save();
@@ -240,7 +241,9 @@ export const getAllOrders = async (): Promise<ApiResponse<any>> => {
 
     try {
         // Truy vấn tất cả đơn hàng trong cơ sở dữ liệu
-        const orders = await OrderModel.find().populate('products.productId').exec();
+        const orders = await OrderModel.find().populate('products.productId')
+        .sort({ createdAt: -1 })    
+        .exec();
 
         if (!orders || orders.length === 0) {
             return {

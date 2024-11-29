@@ -5,6 +5,7 @@ export interface Order extends mongoose.Document {
     totalPrice: number;
     status: string; // Enum status
     createdAt: Date;
+    userId: string
 }
 
 // Define the OrderSchema
@@ -43,7 +44,8 @@ const OrderSchema = new mongoose.Schema<Order>({
         type: Date,
         default: Date.now, // Automatically set the creation date
         required: true
-    }
+    },
+    userId: { type: String }
 });
 
 // Middleware to restrict cancellation within 30 minutes of order placement

@@ -21,3 +21,14 @@ export const getGeneralStatistics = async (request: express.Request, response: e
         response.status(500).json({ error: error.message })
     }
 }
+
+export const getOrderDetails = async (request: express.Request, response: express.Response) => {
+    try {
+        const {orderId} = request.params
+        const Response = await adminService.getOrderDetails(orderId)
+        response.json(Response);
+    } catch (error) {
+        console.log(error)
+        response.status(500).json({ error: error.message })
+    }
+}

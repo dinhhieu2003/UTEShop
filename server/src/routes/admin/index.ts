@@ -7,5 +7,6 @@ const router = express.Router();
 export default (): express.Router => {
     router.post("/users/statistics", checkAuth, adminController.getUserStatistics);
     router.get("/general-statistics", checkAuth, adminController.getGeneralStatistics);
+    router.get("/orders/:orderId", checkAuth, adminController.getOrderDetails);
     return router;
 }

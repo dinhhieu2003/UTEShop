@@ -9,6 +9,7 @@ export interface IUser extends mongoose.Document {
     otp: string;
     address: IAddress;
     isActivated: boolean;
+    createdAt: Date;
     role: string;
     cart: ICart;
     orders: mongoose.Schema.Types.ObjectId[];
@@ -86,6 +87,11 @@ const UserSchema = new mongoose.Schema<IUser>({
         type: Boolean,
         required: false,
         default: false
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+        required: true
     },
     role: {
         type: String,

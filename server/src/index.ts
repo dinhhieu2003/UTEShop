@@ -36,6 +36,8 @@ import productRouter from "./routes/product/index";
 import categoryRouter from "./routes/category/index";
 import userRouter from "./routes/user/index";
 import orderRouter from "./routes/order/index";
+import couponRouter from "./routes/coupon/index";
+import adminRouter from "./routes/admin/index";
 
 app.use("/api/v1/auth", authRouter());
 app.use("/api/v1/carts", cartRouter());
@@ -43,6 +45,8 @@ app.use("/api/v1/products", productRouter());
 app.use("/api/v1/categories", categoryRouter());
 app.use("/api/v1/users", userRouter());
 app.use("/api/v1/orders", orderRouter());
+app.use("/api/v1/coupons", couponRouter());
+app.use("/api/v1/admin", adminRouter());
 
 // Listen server
 server.listen(port, () => {

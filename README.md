@@ -52,15 +52,6 @@ UTEShop is a backend server application for an e-commerce platform built with No
 - Bcrypt-nodejs for password hashing
 - Nodemailer for sending emails
 
-## API Endpoints
-
-### Auth
-- POST `/api/v1/auth/register`: Register a new user
-- POST `/api/v1/auth/verify-otp`: Verify OTP for account activation
-- POST `/api/v1/auth/login`: User login
-- POST `/api/v1/auth/forgot-password`: Request password reset
-- POST `/api/v1/auth/reset-password`: Reset password with OTP
-
 ## License
 
 ISC

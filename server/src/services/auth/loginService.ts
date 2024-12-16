@@ -10,9 +10,9 @@ export const login = async (email: string, password: string) => {
     if (!user) {
         response = {
             statusCode: 401,
-            message: 'Invalid login credentials - email',
+            message: 'Tài khoản hoặc mật khẩu không đúng',
             data: null,
-            error: "Unauthorized"
+            error: "Đăng nhập không thành công"
         }
         return response;
     }
@@ -21,9 +21,9 @@ export const login = async (email: string, password: string) => {
     if (!isPasswordMatch) {
         response = {
             statusCode: 401,
-            message: 'Invalid login credentials',
+            message: 'Tài khoản hoặc mật khẩu không đúng',
             data: null,
-            error: "Unauthorized"
+            error: "Đăng nhập không thành công"
         }
         return response;
     }

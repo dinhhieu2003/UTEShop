@@ -19,9 +19,9 @@ export const registerUser = async (fullName: string, email: string, password: st
     if (existingUser) {
         response = {
             statusCode: 400,
-            message: 'Can not register',
+            message: 'Email đã tồn tại',
             data: null,
-            error: 'User already exists'
+            error: 'Không thể đăng ký thành công'
         }
         return response
     }

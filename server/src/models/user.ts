@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt-nodejs";
+import * as bcrypt from "bcrypt-nodejs";
 import { Product, ProductModel, ProductSchema } from "../models/product";
 
 export interface IUser extends mongoose.Document {
